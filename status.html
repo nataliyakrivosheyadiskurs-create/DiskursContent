@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diskurs — Статус проектов</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  /* ===== TABLE ===== */
+  .status-table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius);
+  }
+
+  .status-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .status-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+  }
+
+  .status-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .status-table tr:last-child td { border-bottom: none; }
+  .status-table tbody tr:hover td { background: var(--blue-light); }
+
+  .proj-name-td {
+    font-weight: 500;
+    max-width: 220px;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* ===== MINI BARS ===== */
+  .mini-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 100px;
+  }
+
+  .mini-bar .bar-track {
+    flex: 1;
+    height: 6px;
+  }
+
+  .mini-pct {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    width: 36px;
+    text-align: right;
+  }
+
+  /* ===== DATE BADGE ===== */
+  .date-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .date-badge.ok      { background: var(--blue-light); color: var(--blue); }
+  .date-badge.expired { background: var(--red-bg);     color: var(--red); }
+
+  /* ===== STATS ROW ===== */
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    flex: 1;
+    min-width: 120px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px 18px;
+  }
+
+  .stat-val { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+  .stat-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ===== FILTERS ===== */
+  .filters-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 5px 13px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .12s;
+  }
+
+  .filter-btn.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a class="logo" href="../../index.html">
+      <div class="logo-mark">D</div>
+      Diskurs
+    </a>
+    <div class="nav" id="nav-links"></div>
+    <div class="user-chip">
+      <div class="avatar" id="av">?</div>
+      <span class="user-name" id="uname">Имя</span>
+      <button class="btn-logout" onclick="doLogout()">Выйти</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div>
+      <div class="page-title">Статус проектов</div>
+      <div class="page-sub">Данные из листа СТАТУС · <span id="last-updated"></span></div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="loadData()">Обновить</button>
+  </div>
+
+  <!-- Сводные карточки -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-val" id="st-total">—</div><div class="stat-lbl">Всего проектов</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--red)" id="st-debt">—</div><div class="stat-lbl">С долгами</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--yellow)" id="st-behind">—</div><div class="stat-lbl">Отстают по времени</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--green)" id="st-ok">—</div><div class="stat-lbl">В норме</div></div>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="filters-row">
+    <button class="filter-btn active" data-filter="all"    onclick="setFilter('all')">Все</button>
+    <button class="filter-btn"        data-filter="debt"   onclick="setFilter('debt')">С долгами</button>
+    <button class="filter-btn"        data-filter="behind" onclick="setFilter('behind')">Отстают</button>
+    <button class="filter-btn"        data-filter="ok"     onclick="setFilter('ok')">В норме</button>
+  </div>
+
+  <!-- Таблица -->
+  <div class="card">
+    <div class="status-table-wrap">
+      <div class="loading-box" id="table-wrap">
+        <span class="spinner spinner-blue"></span> Загрузка…
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../utils/config.js"></script>
+<script src="../utils/api.js"></script>
+<script>
+const user = Auth.require();
+let allRows = [];
+let activeFilter = 'all';
+
+if (user) init();
+
+function init() {
+  document.getElementById('av').textContent    = user.name.charAt(0).toUpperCase();
+  document.getElementById('uname').textContent = user.name;
+
+  // Навигация по роли
+  const nav = document.getElementById('nav-links');
+  if (user.role === 'viewer') {
+    nav.innerHTML = `<a class="nav-link active" href="status.html">Статус</a>`;
+  } else {
+    nav.innerHTML = `
+      <a class="nav-link" href="projects.html">Проекты</a>
+      <a class="nav-link active" href="status.html">Статус</a>
+      <a class="nav-link" href="head.html">Хэд</a>
+    `;
+  }
+
+  loadData();
+}
+
+async function loadData() {
+  document.getElementById('table-wrap').innerHTML =
+    '<div class="loading-box"><span class="spinner spinner-blue"></span> Загрузка…</div>';
+
+  const res = await apiCall('getStatus');
+  if (!res.success) {
+    document.getElementById('table-wrap').innerHTML =
+      `<div class="empty-box">Ошибка: ${esc(res.error)}</div>`;
+    return;
+  }
+
+  allRows = res.rows || [];
+  document.getElementById('last-updated').textContent = 'обновлено только что';
+
+  renderStats();
+  renderTable();
+}
+
+function renderStats() {
+  const total  = allRows.length;
+  const debt   = allRows.filter(r => r.debt > 0).length;
+  const behind = allRows.filter(r => r.contentPct < r.timePct - 15).length;
+  const ok     = total - debt;
+
+  document.getElementById('st-total').textContent  = total;
+  document.getElementById('st-debt').textContent   = debt;
+  document.getElementById('st-behind').textContent = behind;
+  document.getElementById('st-ok').textContent     = ok;
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  renderTable();
+}
+
+function renderTable() {
+  let rows = allRows;
+
+  if (activeFilter === 'debt')   rows = rows.filter(r => r.debt > 0);
+  if (activeFilter === 'behind') rows = rows.filter(r => r.contentPct < r.timePct - 15);
+  if (activeFilter === 'ok')     rows = rows.filter(r => r.debt <= 0 && r.contentPct >= r.timePct - 15);
+
+  if (!rows.length) {
+    document.getElementById('table-wrap').innerHTML = '<div class="empty-box">Нет данных</div>';
+    return;
+  }
+
+  const expired = isExpired; // функция из api.js
+
+  const html = `<table class="status-table">
+    <thead>
+      <tr>
+        <th>Проект</th>
+        <th>Расч. день</th>
+        <th>Время</th>
+        <th>Объём</th>
+        <th>Долги</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(r => {
+        const exp    = isExpired(r.raschetDate);
+        const tCls   = r.timePct >= 100 ? 'crit' : r.timePct >= 80 ? 'warn' : '';
+        const behind = r.contentPct < r.timePct - 15;
+        const cCls   = r.contentPct >= 100 ? 'good' : behind ? 'crit' : r.contentPct >= 80 ? 'warn' : '';
+        const dBadge = r.debt > 0 ? 'badge-red' : 'badge-green';
+
+        return `<tr>
+          <td class="proj-name-td">${esc(r.project)}</td>
+          <td><span class="date-badge ${exp ? 'expired' : 'ok'}">${r.raschetDate}</span></td>
+          <td>
+            <div class="mini-bar">
+              <div class="bar-track" style="flex:1;height:6px">
+                <div class="bar-fill ${tCls}" style="width:${r.timePct}%"></div>
+              </div>
+              <span class="mini-pct">${r.timePct}%</span>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="bar-track" style="flex:1;height:6px">
+                <div class="bar-fill ${cCls}" style="width:${Math.min(r.contentPct,100)}%"></div>
+              </div>
+              <span class="mini-pct">${r.contentPct}%</span>
+            </div>
+          </td>
+          <td><span class="badge ${dBadge}">${r.debt}</span></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+
+  document.getElementById('table-wrap').innerHTML = html;
+}
+
+function doLogout() { Auth.clear(); window.location.href = '../../index.html'; }
+</script>
+</body>
+</html>

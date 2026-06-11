@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diskurs — Проекты</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  /* ===== PROJECT LIST ===== */
+  .project-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background .12s;
+    gap: 8px;
+  }
+  .project-item:last-child { border-bottom: none; }
+  .project-item:hover { background: var(--blue-light); }
+  .project-item:hover .proj-arrow { color: var(--blue); }
+
+  .proj-name { font-size: 14px; font-weight: 500; flex: 1; }
+  .proj-arrow { color: var(--border); font-size: 18px; transition: color .12s; }
+
+  /* ===== INPUT VIEW ===== */
+  #view-input { display: none; }
+
+  .proj-header-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .proj-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; flex: 1; }
+
+  .date-pill {
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 11px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .period-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ===== PROGRESS ===== */
+  .prog-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .prog-cell {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+
+  .prog-type {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+  }
+
+  .prog-track { height: 6px; margin-bottom: 7px; }
+
+  .prog-nums {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .prog-nums span { font-size: 12px; font-weight: 400; color: var(--muted); }
+
+  /* ===== TIME ROW ===== */
+  .time-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 14px;
+    margin-top: 6px;
+    border-top: 1px solid var(--border);
+  }
+  .time-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .time-track { flex: 1; height: 4px; }
+  .time-fill  { height: 100%; border-radius: 99px; background: var(--muted); }
+  .time-pct   { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+
+  /* ===== COUNTERS ===== */
+  .mode-row { display: flex; gap: 6px; margin-bottom: 14px; }
+
+  .mode-btn {
+    flex: 1; padding: 7px 8px;
+    border-radius: 7px; border: 1.5px solid var(--border);
+    background: transparent; color: var(--muted);
+    font-family: inherit; font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all .12s;
+  }
+  .mode-btn.active {
+    background: var(--blue-light);
+    border-color: var(--blue);
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  .counters-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .counter-box {
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+
+  .counter-type {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
+  }
+
+  .counter-ctrl {
+    display: flex; align-items: center;
+    justify-content: center; gap: 6px;
+  }
+
+  .c-btn {
+    width: 30px; height: 30px; border-radius: 7px;
+    border: 1.5px solid var(--border); background: var(--bg);
+    color: var(--text); font-size: 18px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center;
+    justify-content: center; transition: all .1s;
+    font-family: inherit; line-height: 1; flex-shrink: 0;
+  }
+  .c-btn:hover { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+  .c-btn:active { transform: scale(.9); }
+
+  .c-val { font-size: 22px; font-weight: 700; min-width: 28px; }
+
+  /* ===== NEW PROJECT FORM ===== */
+  #new-proj-card { display: none; margin-top: 12px; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-header h2 { font-size: 15px; font-weight: 700; }
+
+  @media (max-width: 400px) {
+    .prog-grid { grid-template-columns: 1fr; }
+    .counters-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a class="logo" href="../../index.html">
+      <div class="logo-mark">D</div>
+      Diskurs
+    </a>
+
+    <div class="nav" id="nav-links">
+      <a class="nav-link active" href="projects.html">Проекты</a>
+      <!-- head/viewer видят дополнительные вкладки — вставляются JS -->
+    </div>
+
+    <div class="user-chip">
+      <div class="avatar" id="av">?</div>
+      <span class="user-name" id="uname">Имя</span>
+      <button class="btn-logout" onclick="doLogout()">Выйти</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== СПИСОК ПРОЕКТОВ ===================== -->
+<div class="page page-narrow" id="view-list">
+
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+    <div>
+      <div class="page-title">Мои проекты</div>
+      <div class="page-sub" id="today-sub"></div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="toggleNewProj()">+ Новый проект</button>
+  </div>
+
+  <!-- Список -->
+  <div class="card" id="proj-list-card">
+    <div class="loading-box"><span class="spinner spinner-blue"></span> Загрузка…</div>
+  </div>
+
+  <!-- Форма нового проекта -->
+  <div class="card" id="new-proj-card">
+    <div class="card-header">
+      <h2>Новый проект</h2>
+      <button class="btn btn-ghost btn-sm" onclick="toggleNewProj()">Отмена</button>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Название проекта</label>
+        <input type="text" id="np-name" placeholder="Клиент — тип работы">
+      </div>
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Статика / мес</label>
+          <input type="number" id="np-static" min="0" value="0">
+        </div>
+        <div class="field">
+          <label>Reels / мес</label>
+          <input type="number" id="np-reels" min="0" value="0">
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Сторис / мес</label>
+          <input type="number" id="np-stories" min="0" value="0">
+        </div>
+        <div class="field">
+          <label>Расчётный день</label>
+          <input type="date" id="np-date">
+        </div>
+      </div>
+      <div class="field" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="np-launch" style="width:auto;margin:0;">
+        <label style="margin:0;text-transform:none;font-size:13px;font-weight:500;color:var(--text);">
+          Проект на запуске
+        </label>
+      </div>
+      <div class="error-msg" id="np-err"></div>
+      <button class="btn btn-primary btn-full" id="np-btn" onclick="doCreateProj()" style="margin-top:6px;">
+        Создать проект
+      </button>
+    </div>
+  </div>
+
+</div><!-- /view-list -->
+
+<!-- ===================== ВВОД ДАННЫХ ===================== -->
+<div class="page page-narrow" id="view-input">
+
+  <button class="back-link" onclick="backToList()">← Назад к проектам</button>
+
+  <!-- Заголовок проекта -->
+  <div class="card card-body-sm" style="margin-bottom:12px;">
+    <div class="proj-header-card">
+      <div class="proj-title" id="proj-title">Проект</div>
+      <div class="date-pill" id="today-pill"></div>
+    </div>
+    <div class="period-sub" id="proj-period">Загрузка…</div>
+  </div>
+
+  <!-- Прогресс -->
+  <div class="card card-body-sm" id="progress-card" style="margin-bottom:12px;">
+    <div class="section-label">Прогресс за месяц</div>
+    <div class="prog-grid" id="prog-grid"></div>
+    <div class="time-row">
+      <span class="time-label" id="time-label">0 из 0 дн.</span>
+      <div class="time-track bar-track">
+        <div class="time-fill" id="time-fill" style="width:0%"></div>
+      </div>
+      <span class="time-pct" id="time-pct">0%</span>
+    </div>
+  </div>
+
+  <!-- Ввод -->
+  <div class="card card-body-sm">
+    <div class="section-label">Сегодня опубликовано</div>
+
+    <div class="mode-row">
+      <button class="mode-btn active" id="mode-add" onclick="setMode('add')">+ Добавить</button>
+      <button class="mode-btn" id="mode-set" onclick="setMode('set')">Заменить</button>
+    </div>
+
+    <div class="counters-row">
+      <div class="counter-box">
+        <div class="counter-type">Статика</div>
+        <div class="counter-ctrl">
+          <button class="c-btn" onclick="chg('s',-1)">−</button>
+          <div class="c-val" id="vs">0</div>
+          <button class="c-btn" onclick="chg('s',1)">+</button>
+        </div>
+      </div>
+      <div class="counter-box">
+        <div class="counter-type">Reels</div>
+        <div class="counter-ctrl">
+          <button class="c-btn" onclick="chg('r',-1)">−</button>
+          <div class="c-val" id="vr">0</div>
+          <button class="c-btn" onclick="chg('r',1)">+</button>
+        </div>
+      </div>
+      <div class="counter-box">
+        <div class="counter-type">Сторис</div>
+        <div class="counter-ctrl">
+          <button class="c-btn" onclick="chg('st',-1)">−</button>
+          <div class="c-val" id="vst">0</div>
+          <button class="c-btn" onclick="chg('st',1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="save-btn" onclick="doSave()" disabled>
+      Сохранить
+    </button>
+  </div>
+
+</div><!-- /view-input -->
+
+<div class="toast" id="toast"></div>
+
+<script src="../utils/config.js"></script>
+<script src="../utils/api.js"></script>
+<script>
+// ====== INIT ======
+const user = Auth.require();
+if (user) init();
+
+function init() {
+  // Шапка
+  document.getElementById('av').textContent    = user.name.charAt(0).toUpperCase();
+  document.getElementById('uname').textContent = user.name;
+
+  // Доп. навигация для head
+  if (user.role === 'head' || user.role === 'viewer') {
+    const nav = document.getElementById('nav-links');
+    nav.innerHTML = `
+      <a class="nav-link active" href="projects.html">Проекты</a>
+      <a class="nav-link" href="status.html">Статус</a>
+      <a class="nav-link" href="head.html">Хэд</a>
+    `;
+  }
+
+  // Дата
+  const today = new Date();
+  document.getElementById('today-sub').textContent = fmtDateRu(
+    `${String(today.getDate()).padStart(2,'0')}.${String(today.getMonth()+1).padStart(2,'0')}.${today.getFullYear()}`
+  );
+  document.getElementById('today-pill').textContent = fmtDateRu(
+    `${String(today.getDate()).padStart(2,'0')}.${String(today.getMonth()+1).padStart(2,'0')}.${today.getFullYear()}`
+  );
+
+  // Дефолтная дата в форме нового проекта
+  const d = today;
+  document.getElementById('np-date').value =
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  loadProjects();
+}
+
+// ====== ПРОЕКТЫ ======
+async function loadProjects() {
+  const card = document.getElementById('proj-list-card');
+  card.innerHTML = '<div class="loading-box"><span class="spinner spinner-blue"></span> Загрузка…</div>';
+
+  const res = await apiCall('getProjects', { projectsFilter: user.projectsFilter });
+  if (!res.success) {
+    card.innerHTML = `<div class="empty-box">Ошибка: ${esc(res.error)}</div>`;
+    return;
+  }
+
+  if (!res.projects.length) {
+    card.innerHTML = '<div class="empty-box">Нет проектов</div>';
+    return;
+  }
+
+  card.innerHTML = res.projects.map(p => `
+    <div class="project-item" onclick="openProject('${esc(p)}')">
+      <span class="proj-name">${esc(p)}</span>
+      <span class="proj-arrow">›</span>
+    </div>
+  `).join('');
+
+  window._projects = res.projects;
+}
+
+// ====== НОВЫЙ ПРОЕКТ ======
+function toggleNewProj() {
+  const card = document.getElementById('new-proj-card');
+  card.style.display = card.style.display === 'none' || !card.style.display ? 'block' : 'none';
+}
+
+async function doCreateProj() {
+  const name     = document.getElementById('np-name').value.trim();
+  const pS       = document.getElementById('np-static').value;
+  const pR       = document.getElementById('np-reels').value;
+  const pSt      = document.getElementById('np-stories').value;
+  const dateVal  = document.getElementById('np-date').value;
+  const isLaunch = document.getElementById('np-launch').checked;
+  const err      = document.getElementById('np-err');
+  const btn      = document.getElementById('np-btn');
+
+  if (!name)    { showFieldErr(err, 'Введи название'); return; }
+  if (!dateVal) { showFieldErr(err, 'Выбери дату');    return; }
+  err.classList.remove('visible');
+
+  const [y,m,d] = dateVal.split('-');
+  setBtnLoading(btn, 'Создаю…');
+
+  const res = await apiCall('createProject', {
+    name,
+    responsibleName: user.name,
+    planStatic:  +pS  || 0,
+    planReels:   +pR  || 0,
+    planStories: +pSt || 0,
+    raschetDay: `${d}.${m}.${y}`,
+    isLaunch
+  });
+
+  resetBtn(btn, 'Создать проект');
+  if (!res.success) { showFieldErr(err, res.error); return; }
+
+  toggleNewProj();
+  document.getElementById('np-name').value = '';
+  showToast('Проект создан ✓', 'success');
+  loadProjects();
+}
+
+// ====== ОТКРЫТЬ ПРОЕКТ ======
+const st = { proj: null, data: null, mode: 'add', v: {s:0,r:0,st:0} };
+
+async function openProject(name) {
+  st.proj = name;
+  st.v    = {s:0,r:0,st:0};
+  st.mode = 'add';
+  resetCounters();
+  setMode('add');
+
+  document.getElementById('view-list').style.display  = 'none';
+  document.getElementById('view-input').style.display = 'block';
+  document.getElementById('proj-title').textContent   = name;
+  document.getElementById('proj-period').textContent  = 'Загрузка…';
+  document.getElementById('save-btn').disabled        = true;
+  document.getElementById('prog-grid').innerHTML      =
+    '<div class="prog-cell"><div class="loading-box" style="padding:12px 0"><span class="spinner spinner-blue"></span></div></div>'.repeat(3);
+
+  const res = await apiCall('getProject', { projectName: name });
+  st.data = res;
+  if (!res.success) { document.getElementById('proj-period').textContent = res.error; return; }
+
+  renderProgress(res);
+  document.getElementById('save-btn').disabled = false;
+
+  if (!res.todayFound) {
+    showToast('Колонка для сегодня не найдена в таблице', 'error');
+    document.getElementById('save-btn').disabled = true;
+  }
+}
+
+function backToList() {
+  document.getElementById('view-input').style.display = 'none';
+  document.getElementById('view-list').style.display  = 'block';
+}
+
+// ====== РЕНДЕР ПРОГРЕССА ======
+function renderProgress(data) {
+  document.getElementById('proj-period').textContent = 'Расчётный период с ' + data.raschetDate;
+
+  const types = ['Статика','Reels','Сторис'];
+  const plan  = data.planWithDebt;
+  const done  = data.done;
+
+  document.getElementById('prog-grid').innerHTML = types.map((t,i) => {
+    const p = plan[i]||0, d = done[i]||0;
+    const pct = p > 0 ? Math.round(d/p*100) : (d>0?100:0);
+    const cls = pct>=100 ? 'good' : pct>=80 ? 'warn' : '';
+    return `<div class="prog-cell">
+      <div class="prog-type">${t}</div>
+      <div class="bar-track prog-track"><div class="bar-fill ${cls}" style="width:${Math.min(pct,100)}%"></div></div>
+      <div class="prog-nums">${d}<span> / ${p}</span></div>
+    </div>`;
+  }).join('');
+
+  const tp = data.daysTotal > 0 ? Math.round(data.daysPassed/data.daysTotal*100) : 0;
+  document.getElementById('time-label').textContent = `${data.daysPassed} из ${data.daysTotal} дн.`;
+  document.getElementById('time-fill').style.width  = tp + '%';
+  document.getElementById('time-pct').textContent   = tp + '%';
+}
+
+// ====== СЧЁТЧИКИ ======
+function chg(type, delta) {
+  st.v[type] = Math.max(0, (st.v[type]||0) + delta);
+  document.getElementById('v' + type).textContent = st.v[type];
+}
+
+function resetCounters() {
+  st.v = {s:0,r:0,st:0};
+  ['s','r','st'].forEach(t => document.getElementById('v'+t).textContent = 0);
+}
+
+function setMode(m) {
+  st.mode = m;
+  document.getElementById('mode-add').classList.toggle('active', m==='add');
+  document.getElementById('mode-set').classList.toggle('active', m==='set');
+}
+
+// ====== СОХРАНЕНИЕ ======
+async function doSave() {
+  const total = st.v.s + st.v.r + st.v.st;
+  if (total === 0 && st.mode === 'add') { showToast('Нечего сохранять — все нули', 'error'); return; }
+
+  const btn = document.getElementById('save-btn');
+  setBtnLoading(btn, 'Сохраняю…');
+
+  const res = await apiCall('saveData', {
+    projectName: st.proj,
+    values: { staticVal: st.v.s, reelsVal: st.v.r, storiesVal: st.v.st },
+    mode: st.mode
+  });
+
+  resetBtn(btn, 'Сохранить');
+  if (!res.success) { showToast('Ошибка: ' + res.error, 'error'); return; }
+
+  st.data = res;
+  renderProgress(res);
+  resetCounters();
+  showToast('Сохранено ✓', 'success');
+}
+
+// ====== УТИЛИТЫ ======
+function doLogout() { Auth.clear(); window.location.href = '../../index.html'; }
+
+function showFieldErr(el, msg) { el.textContent = msg; el.classList.add('visible'); }
+</script>
+</body>
+</html>

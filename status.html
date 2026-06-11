@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diskurs — Статус</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--blue:#1A56E8;--blue-d:#1340BE;--blue-l:#EEF3FD;--blue-m:#C4D4FA;--bg:#F5F7FB;--white:#fff;--border:#E2E8F0;--text:#0F172A;--muted:#64748B;--green:#16A34A;--gbg:#DCFCE7;--yellow:#CA8A04;--ybg:#FEF9C3;--red:#DC2626;--rbg:#FEE2E2;--r:10px;--sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05)}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+.topbar{position:sticky;top:0;z-index:50;background:var(--white);border-bottom:1px solid var(--border);box-shadow:var(--sh)}
+.tb-in{max-width:1100px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.03em}
+.logo-m{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800}
+.nav{display:flex;gap:2px}
+.nav a{padding:6px 12px;border-radius:7px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;transition:all .12s}
+.nav a:hover{color:var(--text);background:var(--bg)}
+.nav a.on{color:var(--blue);background:var(--blue-l);font-weight:600}
+.uchip{display:flex;align-items:center;gap:7px}
+.av{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.uname{font-size:13px;font-weight:600}
+.logout-btn{background:none;border:none;font-family:inherit;font-size:12px;color:var(--muted);cursor:pointer;padding:4px 6px;border-radius:5px}
+.logout-btn:hover{color:var(--red)}
+.page{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.ptitle{font-size:20px;font-weight:700;letter-spacing:-0.02em}
+.psub{font-size:13px;color:var(--muted);margin-top:3px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh)}
+
+/* stats */
+.srow{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.scard{flex:1;min-width:120px;background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:14px 18px}
+.sval{font-size:26px;font-weight:800;letter-spacing:-0.03em}
+.slbl{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* filters */
+.frow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.fbtn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s}
+.fbtn.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+
+/* table */
+.twrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+th{text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--blue-l)}
+.td-name{font-weight:500;max-width:200px;white-space:normal;word-break:break-word}
+
+/* mini bar */
+.mbar{display:flex;align-items:center;gap:8px;min-width:100px}
+.mbar-track{flex:1;height:6px;background:var(--border);border-radius:99px;overflow:hidden}
+.mbar-fill{height:100%;border-radius:99px;background:var(--blue);transition:width .3s}
+.mbar-fill.warn{background:var(--yellow)}
+.mbar-fill.crit{background:var(--red)}
+.mbar-fill.good{background:var(--green)}
+.mpct{font-size:12px;font-weight:600;color:var(--muted);width:36px;text-align:right}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.bg{background:var(--gbg);color:var(--green)}
+.br{background:var(--rbg);color:var(--red)}
+.bb{background:var(--blue-l);color:var(--blue)}
+.bexp{background:var(--rbg);color:var(--red);border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700}
+.bok{background:var(--blue-l);color:var(--blue);border-radius:5px;padding:2px 7px;font-size:11px;font-weight:600}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;padding:7px 14px;cursor:pointer;transition:background .15s;white-space:nowrap}
+.btn-o{background:var(--white);color:var(--blue);border:1.5px solid var(--blue-m)}
+.btn-o:hover{background:var(--blue-l)}
+
+.loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px 0;color:var(--muted);font-size:14px}
+.empty{text-align:center;padding:40px 0;color:var(--muted);font-size:14px}
+@keyframes _sp{to{transform:rotate(360deg)}}
+.sp{display:inline-block;width:13px;height:13px;border:2px solid rgba(26,86,232,.2);border-top-color:var(--blue);border-radius:50%;animation:_sp .6s linear infinite}
+@media(max-width:600px){.uname{display:none}.sval{font-size:20px}}
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="tb-in">
+    <a class="logo" href="index.html"><div class="logo-m">D</div>Diskurs</a>
+    <div class="nav" id="nav"></div>
+    <div class="uchip">
+      <div class="av" id="av">?</div>
+      <span class="uname" id="uname"></span>
+      <button class="logout-btn" onclick="logout()">Выйти</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="ph">
+    <div>
+      <div class="ptitle">Статус проектов</div>
+      <div class="psub">Данные из листа СТАТУС</div>
+    </div>
+    <button class="btn btn-o" onclick="load()">Обновить</button>
+  </div>
+
+  <div class="srow">
+    <div class="scard"><div class="sval" id="stTotal">—</div><div class="slbl">Всего проектов</div></div>
+    <div class="scard"><div class="sval" style="color:var(--red)" id="stDebt">—</div><div class="slbl">С долгами</div></div>
+    <div class="scard"><div class="sval" style="color:var(--yellow)" id="stBehind">—</div><div class="slbl">Отстают</div></div>
+    <div class="scard"><div class="sval" style="color:var(--green)" id="stOk">—</div><div class="slbl">В норме</div></div>
+  </div>
+
+  <div class="frow">
+    <button class="fbtn on" data-f="all"    onclick="setF(this,'all')">Все</button>
+    <button class="fbtn"    data-f="debt"   onclick="setF(this,'debt')">С долгами</button>
+    <button class="fbtn"    data-f="behind" onclick="setF(this,'behind')">Отстают</button>
+    <button class="fbtn"    data-f="ok"     onclick="setF(this,'ok')">В норме</button>
+  </div>
+
+  <div class="card">
+    <div class="twrap" id="twrap">
+      <div class="loading"><span class="sp"></span> Загрузка…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbwBa7VLwwwsKWyopBjgZSZSaOW53S4CBTz5fELjmeRo_xFqMvCDlzvWlaUr9-1x7fBn/exec';
+
+async function api(action,params={}){
+  try{const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action,...params}),redirect:'follow'});return await r.json();}
+  catch(e){return{success:false,error:e.message};}
+}
+const Auth={get(){try{return JSON.parse(sessionStorage.getItem('dsk_user'));}catch{return null;}},clear(){sessionStorage.removeItem('dsk_user');}};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function isExpired(s){if(!s)return false;const[d,m,y]=String(s).split('.');const r=new Date(+y,+m-1,+d);const n=new Date(r);n.setMonth(n.getMonth()+1);return new Date()>=n;}
+
+const user=Auth.get();
+if(!user){window.location.href='index.html';}
+else{init();}
+
+let allRows=[], curF='all';
+
+function init(){
+  document.getElementById('av').textContent=user.name.charAt(0).toUpperCase();
+  document.getElementById('uname').textContent=user.name;
+  const nav=document.getElementById('nav');
+  if(user.role==='viewer'){
+    nav.innerHTML='<a class="on" href="status.html">Статус</a><a href="head.html">Хэд</a>';
+  } else {
+    nav.innerHTML='<a href="projects.html">Проекты</a><a class="on" href="status.html">Статус</a><a href="head.html">Хэд</a>';
+  }
+  load();
+}
+
+async function load(){
+  document.getElementById('twrap').innerHTML='<div class="loading"><span class="sp"></span> Загрузка…</div>';
+  const res=await api('getStatus');
+  if(!res.success){document.getElementById('twrap').innerHTML=`<div class="empty">Ошибка: ${esc(res.error)}</div>`;return;}
+  allRows=res.rows||[];
+  renderStats();
+  renderTable();
+}
+
+function renderStats(){
+  const total=allRows.length;
+  const debt=allRows.filter(r=>r.debt>0).length;
+  const behind=allRows.filter(r=>r.contentPct<r.timePct-15).length;
+  document.getElementById('stTotal').textContent=total;
+  document.getElementById('stDebt').textContent=debt;
+  document.getElementById('stBehind').textContent=behind;
+  document.getElementById('stOk').textContent=total-debt;
+}
+
+function setF(btn,f){
+  curF=f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',b===btn));
+  renderTable();
+}
+
+function renderTable(){
+  let rows=allRows;
+  if(curF==='debt')   rows=rows.filter(r=>r.debt>0);
+  if(curF==='behind') rows=rows.filter(r=>r.contentPct<r.timePct-15);
+  if(curF==='ok')     rows=rows.filter(r=>r.debt<=0&&r.contentPct>=r.timePct-15);
+  if(!rows.length){document.getElementById('twrap').innerHTML='<div class="empty">Нет данных</div>';return;}
+
+  const html='<table><thead><tr><th>Проект</th><th>Расч. день</th><th>Время</th><th>Объём</th><th>Долги</th></tr></thead><tbody>'+
+    rows.map(r=>{
+      const exp=isExpired(r.raschetDate);
+      const tCls=r.timePct>=100?'crit':r.timePct>=80?'warn':'';
+      const cCls=r.contentPct>=100?'good':r.contentPct<r.timePct-15?'crit':r.contentPct>=80?'warn':'';
+      const dB=r.debt>0?'br':'bg';
+      return `<tr><td class="td-name">${esc(r.project)}</td>`+
+        `<td><span class="${exp?'bexp':'bok'}">${r.raschetDate}</span></td>`+
+        `<td><div class="mbar"><div class="mbar-track"><div class="mbar-fill ${tCls}" style="width:${r.timePct}%"></div></div><span class="mpct">${r.timePct}%</span></div></td>`+
+        `<td><div class="mbar"><div class="mbar-track"><div class="mbar-fill ${cCls}" style="width:${Math.min(r.contentPct,100)}%"></div></div><span class="mpct">${r.contentPct}%</span></div></td>`+
+        `<td><span class="badge ${dB}">${r.debt}</span></td></tr>`;
+    }).join('')+'</tbody></table>';
+
+  document.getElementById('twrap').innerHTML=html;
+}
+
+function logout(){Auth.clear();window.location.href='index.html';}
+</script>
+</body>
+</html>

@@ -163,6 +163,17 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,8
     <div class="loading"><span class="sp"></span> Загрузка…</div>
   </div>
 
+  <div style="margin-top:8px">
+    <button class="btn btn-g btn-sm" onclick="toggleArchive()" id="archiveToggle" style="width:100%;color:var(--muted);font-size:12px">
+      📦 Архив проектов
+    </button>
+  </div>
+  <div id="archiveSection" style="display:none;margin-top:6px">
+    <div class="card" id="archiveCard">
+      <div class="loading"><span class="sp"></span> Загрузка…</div>
+    </div>
+  </div>
+
   <div class="card" id="formCard" style="display:none">
     <div class="ch">
       <h2>Новый проект</h2>
@@ -230,6 +241,11 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,8
   <div style="margin-top:10px;text-align:center">
     <button class="btn btn-g btn-sm" onclick="showNewMonth()" style="width:100%;color:var(--muted);font-size:12px">
       + Новый месяц
+    </button>
+  </div>
+  <div style="margin-top:6px;text-align:center">
+    <button class="btn btn-sm" onclick="confirmArchive()" style="width:100%;font-size:12px;color:var(--red);border:1.5px solid #FECACA;background:transparent">
+      Архивировать проект
     </button>
   </div>
 </div>
@@ -480,6 +496,58 @@ async function doSave(){
 
 function showFErr(el,msg){el.textContent=msg;el.classList.add('on');}
 function logout(){Auth.clear();window.location.href='index.html';}
+
+// ── АРХИВ ──
+let archiveLoaded = false;
+
+async function toggleArchive() {
+  const sec = document.getElementById('archiveSection');
+  const btn = document.getElementById('archiveToggle');
+  const visible = sec.style.display !== 'none';
+  sec.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? '📦 Архив проектов' : '📦 Скрыть архив';
+  if (!visible && !archiveLoaded) loadArchive();
+}
+
+async function loadArchive() {
+  const card = document.getElementById('archiveCard');
+  card.innerHTML = '<div class="loading"><span class="sp"></span> Загрузка…</div>';
+  const res = await api('getArchivedProjects');
+  archiveLoaded = true;
+  if (!res.success) { card.innerHTML=`<div class="empty">Ошибка: ${esc(res.error)}</div>`; return; }
+  if (!res.projects.length) { card.innerHTML='<div class="empty" style="padding:16px">Архив пуст</div>'; return; }
+  card.innerHTML = res.projects.map(p =>
+    `<div class="pitem" style="opacity:.65">` +
+    `<span class="pname" style="color:var(--muted)">${esc(p)}</span>` +
+    (user.role==='head'||user.role==='viewer'
+      ? `<button class="btn btn-g btn-sm" style="font-size:11px;padding:4px 10px" onclick="doUnarchive('${esc(p)}')">Восстановить</button>`
+      : `<span style="font-size:11px;color:var(--muted)">архив</span>`) +
+    `</div>`
+  ).join('');
+}
+
+async function doUnarchive(name) {
+  const res = await api('unarchiveProject', { projectName: name });
+  if (!res.success) { showToast('Ошибка: '+res.error, 'err'); return; }
+  showToast(name + ' восстановлен ✓', 'ok');
+  archiveLoaded = false;
+  loadProjects();
+  loadArchive();
+}
+
+function confirmArchive() {
+  if (!confirm('Архивировать проект «' + S.proj + '»?\n\nОн пропадёт из списка активных проектов. Восстановить сможет Лера или Ника.')) return;
+  doArchive();
+}
+
+async function doArchive() {
+  const res = await api('archiveProject', { projectName: S.proj });
+  if (!res.success) { showToast('Ошибка: '+res.error, 'err'); return; }
+  showToast('Проект архивирован', 'ok');
+  archiveLoaded = false;
+  backToList();
+  loadProjects();
+}
 
 function showNewMonth(){
   document.getElementById('nmProjName').textContent=S.proj;

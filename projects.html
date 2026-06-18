@@ -512,7 +512,7 @@ async function toggleArchive() {
 async function loadArchive() {
   const card = document.getElementById('archiveCard');
   card.innerHTML = '<div class="loading"><span class="sp"></span> Загрузка…</div>';
-  const res = await api('getArchivedProjects');
+  const res = await api('getArchivedProjects', { projectsFilter: user.projectsFilter });
   archiveLoaded = true;
   if (!res.success) { card.innerHTML=`<div class="empty">Ошибка: ${esc(res.error)}</div>`; return; }
   if (!res.projects.length) { card.innerHTML='<div class="empty" style="padding:16px">Архив пуст</div>'; return; }

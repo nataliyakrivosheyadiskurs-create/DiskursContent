@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diskurs — Вход</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:#0F172A;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;-webkit-font-smoothing:antialiased}
+.wrap{width:100%;max-width:380px}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:40px}
+.logo-mark{width:44px;height:44px;background:#1A56E8;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;font-weight:800;flex-shrink:0}
+.logo-name{font-size:23px;font-weight:800;letter-spacing:-0.04em;color:#0F172A}
+h1{font-size:20px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px}
+.sub{font-size:14px;color:#64748B;margin-bottom:28px}
+.field{margin-bottom:14px}
+label{display:block;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+input{width:100%;background:#fff;border:1.5px solid #E2E8F0;border-radius:8px;color:#0F172A;font-family:inherit;font-size:14px;padding:11px 13px;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus{border-color:#1A56E8;box-shadow:0 0 0 3px rgba(26,86,232,.10)}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#1A56E8;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;padding:12px;cursor:pointer;transition:background .15s;margin-top:6px;box-shadow:0 2px 8px rgba(26,86,232,.22)}
+.btn:hover{background:#1340BE}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.err{background:#FEE2E2;border:1px solid #FECACA;border-radius:7px;color:#DC2626;font-size:13px;padding:9px 13px;margin-top:10px;display:none}
+.err.on{display:block}
+.footer{font-size:11px;color:#94A3B8;text-align:center;margin-top:32px}
+hr{border:none;border-top:1px solid #E2E8F0;margin:28px 0 20px}
+@keyframes _sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo-row">
+    <div class="logo-mark">D</div>
+    <div class="logo-name">Diskurs</div>
+  </div>
+
+  <h1>Вход в систему</h1>
+  <p class="sub">Контент-портал агентства</p>
+
+  <div class="field">
+    <label>Логин</label>
+    <input type="text" id="iLogin" placeholder="твой логин" autocomplete="username">
+  </div>
+  <div class="field">
+    <label>Пароль</label>
+    <input type="password" id="iPass" placeholder="••••••" autocomplete="current-password">
+  </div>
+
+  <button class="btn" id="btnLogin" onclick="doLogin()">Войти</button>
+  <div class="err" id="errBox"></div>
+
+  <hr>
+  <div class="footer">Diskurs Content App · 2026</div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbzc8iimMEq3qw0mDEL9PweBHdLKkIih6TZDGEii3yLTVeJKqCAqX8gTPZLEYR3mZ7TcMA/exec';
+
+// Если уже залогинен — редирект
+(function(){
+  try {
+    const u = JSON.parse(sessionStorage.getItem('dsk_user'));
+    if (u) go(u.role);
+  } catch(_){}
+})();
+
+
+function api(action, params) {
+  return new Promise((resolve) => {
+    const cbName = '_cb' + Date.now();
+    const data = encodeURIComponent(JSON.stringify({ action, ...params, callback: cbName }));
+    window[cbName] = function(result) {
+      delete window[cbName];
+      document.head.removeChild(script);
+      resolve(result);
+    };
+    const script = document.createElement('script');
+    script.src = API_URL + '?data=' + data + '&callback=' + cbName;
+    script.onerror = function() {
+      delete window[cbName];
+      document.head.removeChild(script);
+      resolve({ success: false, error: 'Не удалось подключиться к серверу' });
+    };
+    document.head.appendChild(script);
+  });
+}
+
+async function doLogin() {
+  const login = document.getElementById('iLogin').value.trim();
+  const pass  = document.getElementById('iPass').value.trim();
+  const btn   = document.getElementById('btnLogin');
+  const err   = document.getElementById('errBox');
+
+  if (!login || !pass) { showErr('Заполни оба поля'); return; }
+  err.classList.remove('on');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:_sp .6s linear infinite"></span> Вхожу…';
+
+  const res = await api('login', { login, password: pass });
+
+  btn.disabled = false;
+  btn.textContent = 'Войти';
+
+  if (!res.success) { showErr(res.error || 'Ошибка'); return; }
+
+  sessionStorage.setItem('dsk_user', JSON.stringify(res));
+  go(res.role);
+}
+
+function go(role) {
+  if (role === 'viewer') window.location.href = 'status.html';
+  else window.location.href = 'projects.html';
+}
+
+function showErr(msg) {
+  const el = document.getElementById('errBox');
+  el.textContent = msg;
+  el.classList.add('on');
+}
+
+document.getElementById('iPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>

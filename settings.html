@@ -5,69 +5,105 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Diskurs — Настройки</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F7FA; color: #1a1a1a; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F7FA; color: #1a1a1a; }
 
-  /* NAV */
-  nav { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
-  .nav-left { display: flex; align-items: center; gap: 24px; }
-  .logo { font-weight: 700; font-size: 18px; color: #1A6BFA; background: #1A6BFA; color: #fff; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-  .nav-links { display: flex; gap: 4px; }
-  .nav-links a { text-decoration: none; color: #6B7280; font-size: 15px; padding: 6px 12px; border-radius: 6px; }
-  .nav-links a:hover { background: #F3F4F6; color: #111; }
-  .nav-links a.active { color: #1A6BFA; font-weight: 500; }
-  .nav-right { display: flex; align-items: center; gap: 12px; }
-  .user-badge { width: 32px; height: 32px; border-radius: 50%; background: #1A6BFA; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
-  .btn-link { background: none; border: none; cursor: pointer; color: #6B7280; font-size: 14px; }
-  .btn-link:hover { color: #111; }
+nav { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+.nav-left { display: flex; align-items: center; gap: 24px; }
+.logo { font-weight: 700; background: #1A6BFA; color: #fff; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.nav-links { display: flex; gap: 4px; }
+.nav-links a { text-decoration: none; color: #6B7280; font-size: 15px; padding: 6px 12px; border-radius: 6px; }
+.nav-links a:hover { background: #F3F4F6; color: #111; }
+.nav-links a.active { color: #1A6BFA; font-weight: 500; }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.user-badge { width: 32px; height: 32px; border-radius: 50%; background: #1A6BFA; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
+.btn-link { background: none; border: none; cursor: pointer; color: #6B7280; font-size: 14px; }
+.btn-link:hover { color: #111; }
 
-  /* PAGE */
-  .page { max-width: 720px; margin: 0 auto; padding: 32px 16px; }
-  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-  .subtitle { color: #6B7280; font-size: 14px; margin-bottom: 28px; }
+.page { max-width: 760px; margin: 0 auto; padding: 32px 16px; }
+h1 { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
 
-  /* MY PROJECTS CARD */
-  .card { background: #fff; border-radius: 12px; border: 1px solid #E5E7EB; margin-bottom: 20px; overflow: hidden; }
-  .card-header { padding: 16px 20px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; }
-  .card-title { font-weight: 600; font-size: 15px; }
-  .card-subtitle { font-size: 13px; color: #6B7280; margin-top: 2px; }
-  .card-body { padding: 16px 20px; }
+/* TABS */
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid #E5E7EB; margin-bottom: 24px; }
+.tab { padding: 10px 18px; font-size: 14px; font-weight: 500; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
+.tab:hover { color: #111; }
+.tab.active { color: #1A6BFA; border-bottom-color: #1A6BFA; }
 
-  /* EMPLOYEE ACCORDION (head only) */
-  .emp-item { border-bottom: 1px solid #F3F4F6; }
-  .emp-item:last-child { border-bottom: none; }
-  .emp-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; cursor: pointer; user-select: none; }
-  .emp-header:hover { background: #F9FAFB; }
-  .emp-name { font-weight: 500; font-size: 15px; }
-  .emp-meta { font-size: 13px; color: #6B7280; margin-top: 2px; }
-  .emp-chevron { color: #9CA3AF; font-size: 18px; transition: transform 0.2s; }
-  .emp-header.open .emp-chevron { transform: rotate(180deg); }
-  .emp-body { display: none; padding: 0 20px 16px; }
-  .emp-body.open { display: block; }
+/* CARDS */
+.card { background: #fff; border-radius: 12px; border: 1px solid #E5E7EB; margin-bottom: 16px; overflow: hidden; }
+.card-header { padding: 16px 20px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-weight: 600; font-size: 15px; }
+.card-sub { font-size: 13px; color: #6B7280; margin-top: 2px; }
+.card-body { padding: 16px 20px; }
 
-  /* CHECKBOXES */
-  .projects-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-  @media (max-width: 480px) { .projects-grid { grid-template-columns: 1fr; } }
-  .proj-check { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; border: 1px solid #E5E7EB; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-  .proj-check:hover { background: #F3F4F6; }
-  .proj-check input[type=checkbox] { width: 16px; height: 16px; accent-color: #1A6BFA; cursor: pointer; flex-shrink: 0; }
-  .proj-check label { font-size: 14px; cursor: pointer; line-height: 1.3; }
-  .proj-check.checked { background: #EFF4FF; border-color: #C7D7FD; }
+/* EMPLOYEE LIST */
+.emp-item { border-bottom: 1px solid #F3F4F6; }
+.emp-item:last-child { border-bottom: none; }
+.emp-row { display: flex; align-items: center; padding: 14px 20px; gap: 12px; }
+.emp-avatar { width: 36px; height: 36px; border-radius: 50%; background: #EFF4FF; color: #1A6BFA; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.emp-info { flex: 1; min-width: 0; }
+.emp-name { font-weight: 600; font-size: 14px; }
+.emp-meta { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+.emp-actions { display: flex; gap: 8px; }
+.btn-icon { background: none; border: 1px solid #E5E7EB; border-radius: 7px; padding: 6px 10px; font-size: 13px; cursor: pointer; color: #6B7280; transition: all .15s; }
+.btn-icon:hover { background: #F3F4F6; border-color: #D1D5DB; color: #111; }
+.btn-icon.danger:hover { background: #FEF2F2; border-color: #FECACA; color: #EF4444; }
+.btn-expand { background: none; border: none; color: #9CA3AF; font-size: 20px; cursor: pointer; padding: 0 4px; line-height: 1; transition: transform .2s; }
+.btn-expand.open { transform: rotate(90deg); }
 
-  /* ALL toggle */
-  .all-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 14px; color: #6B7280; }
-  .all-toggle input { accent-color: #1A6BFA; width: 15px; height: 15px; }
+/* EXPAND PANEL */
+.emp-panel { display: none; border-top: 1px solid #F3F4F6; padding: 16px 20px; background: #FAFAFA; }
+.emp-panel.open { display: block; }
+.panel-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.ptab { padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid #E5E7EB; color: #6B7280; background: #fff; }
+.ptab.active { background: #EFF4FF; border-color: #C7D7FD; color: #1A6BFA; font-weight: 500; }
 
-  /* SAVE BTN */
-  .btn-save { background: #1A6BFA; color: #fff; border: none; border-radius: 8px; padding: 9px 20px; font-size: 14px; font-weight: 500; cursor: pointer; }
-  .btn-save:hover { background: #1558d6; }
-  .btn-save:disabled { background: #93C5FD; cursor: default; }
-  .save-row { display: flex; align-items: center; gap: 12px; }
-  .save-msg { font-size: 13px; color: #10B981; display: none; }
-  .save-msg.err { color: #EF4444; }
+/* PROJECTS GRID */
+.proj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 14px; }
+@media(max-width:480px){ .proj-grid { grid-template-columns: 1fr; } }
+.proj-check { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; border: 1px solid #E5E7EB; cursor: pointer; transition: all .15s; background: #fff; }
+.proj-check:hover { background: #F9FAFB; }
+.proj-check input { accent-color: #1A6BFA; width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+.proj-check label { font-size: 13px; cursor: pointer; line-height: 1.3; }
+.proj-check.on { background: #EFF4FF; border-color: #C7D7FD; }
+.all-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6B7280; margin-bottom: 10px; cursor: pointer; }
+.all-toggle input { accent-color: #1A6BFA; width: 14px; height: 14px; }
 
-  /* LOADING */
-  .loading { text-align: center; padding: 40px; color: #9CA3AF; font-size: 15px; }
+/* EDIT FORM */
+.form-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.form-row label { font-size: 12px; font-weight: 500; color: #6B7280; }
+.form-row input, .form-row select { border: 1px solid #E5E7EB; border-radius: 8px; padding: 9px 12px; font-size: 14px; outline: none; }
+.form-row input:focus, .form-row select:focus { border-color: #1A6BFA; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:480px){ .form-grid { grid-template-columns: 1fr; } }
+
+/* SAVE ROW */
+.save-row { display: flex; align-items: center; gap: 12px; }
+.btn-primary { background: #1A6BFA; color: #fff; border: none; border-radius: 8px; padding: 9px 20px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.btn-primary:hover { background: #1558d6; }
+.btn-primary:disabled { background: #93C5FD; cursor: default; }
+.btn-danger { background: #FEF2F2; color: #EF4444; border: 1px solid #FECACA; border-radius: 8px; padding: 9px 16px; font-size: 14px; cursor: pointer; }
+.btn-danger:hover { background: #FEE2E2; }
+.save-msg { font-size: 13px; color: #10B981; }
+.save-msg.err { color: #EF4444; }
+
+/* ADD FORM MODAL */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; align-items: center; justify-content: center; }
+.overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; margin: 16px; }
+.modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.btn-cancel { background: #F3F4F6; color: #374151; border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px; cursor: pointer; }
+.btn-cancel:hover { background: #E5E7EB; }
+
+/* SELF VIEW */
+.self-card { background: #fff; border-radius: 12px; border: 1px solid #E5E7EB; padding: 20px; }
+
+.loading { text-align: center; padding: 40px; color: #9CA3AF; }
+.role-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.role-head { background: #EFF4FF; color: #1A6BFA; }
+.role-content { background: #F0FDF4; color: #16A34A; }
+.role-viewer { background: #FFF7ED; color: #EA580C; }
 </style>
 </head>
 <body>
@@ -75,12 +111,7 @@
 <nav>
   <div class="nav-left">
     <div class="logo">D</div>
-    <div class="nav-links">
-      <a href="projects.html">Проекты</a>
-      <a href="status.html">Статус</a>
-      <a id="navHead" href="head.html" style="display:none">Хэд</a>
-      <a href="help.html">Помощь</a>
-    </div>
+    <div class="nav-links" id="navLinks"></div>
   </div>
   <div class="nav-right">
     <div class="user-badge" id="userBadge">?</div>
@@ -91,8 +122,32 @@
 
 <div class="page">
   <h1>Настройки</h1>
-  <p class="subtitle">Управление проектами сотрудников</p>
+  <div id="tabsRow"></div>
   <div id="content" class="loading">Загрузка...</div>
+</div>
+
+<!-- ADD EMPLOYEE MODAL -->
+<div class="overlay" id="addModal">
+  <div class="modal">
+    <h2>Новый сотрудник</h2>
+    <div class="form-grid">
+      <div class="form-row"><label>Имя</label><input id="newName" placeholder="Например: Маша"></div>
+      <div class="form-row"><label>Логин</label><input id="newLogin" placeholder="masha"></div>
+      <div class="form-row"><label>Пароль</label><input id="newPass" placeholder="pass123"></div>
+      <div class="form-row"><label>Роль</label>
+        <select id="newRole">
+          <option value="content">content</option>
+          <option value="head">head</option>
+          <option value="viewer">viewer</option>
+        </select>
+      </div>
+    </div>
+    <div id="addError" style="color:#EF4444;font-size:13px;margin-top:8px;display:none"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAddModal()">Отмена</button>
+      <button class="btn-primary" onclick="submitAdd()">Создать</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -100,12 +155,12 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzc8iimMEq3qw0mDEL9PweB
 
 function apiCall(params) {
   return new Promise((resolve, reject) => {
-    const cb = 'cb_' + Date.now();
-    const qs = Object.entries(params).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+    const cb = 'cb_' + Date.now() + Math.random().toString(36).slice(2);
+    const qs = Object.entries(params).map(([k,v]) => k + '=' + encodeURIComponent(v)).join('&');
     const script = document.createElement('script');
-    script.src = `${API_URL}?callback=${cb}&${qs}`;
+    script.src = API_URL + '?' + qs + '&callback=' + cb;
     window[cb] = data => { delete window[cb]; script.remove(); resolve(data); };
-    script.onerror = () => reject(new Error('Network error'));
+    script.onerror = () => { delete window[cb]; script.remove(); reject(new Error('Ошибка сети')); };
     document.head.appendChild(script);
   });
 }
@@ -113,6 +168,7 @@ function apiCall(params) {
 let user = null;
 let allProjects = [];
 let employees = [];
+let activeTab = 'projects'; // 'projects' | 'staff'
 
 function init() {
   const raw = sessionStorage.getItem('dsk_user');
@@ -120,234 +176,289 @@ function init() {
   user = JSON.parse(raw);
   document.getElementById('userBadge').textContent = user.name[0].toUpperCase();
   document.getElementById('userName').textContent = user.name;
-  if (user.role === 'head') document.getElementById('navHead').style.display = '';
 
-  if (user.role === 'head') loadHead();
-  else loadSelf();
+  const isHead = user.role === 'head';
+  document.getElementById('navLinks').innerHTML = isHead
+    ? '<a href="projects.html">Проекты</a><a href="status.html">Статус</a><a href="head.html">Хэд</a><a href="settings.html" class="active">Настройки</a><a href="help.html">Помощь</a>'
+    : '<a href="projects.html">Проекты</a><a href="status.html">Статус</a><a href="settings.html" class="active">Настройки</a><a href="help.html">Помощь</a>';
+
+  if (isHead) {
+    document.getElementById('tabsRow').innerHTML = `
+      <div class="tabs">
+        <div class="tab active" id="tabProjects" onclick="switchTab('projects')">Проекты сотрудников</div>
+        <div class="tab" id="tabStaff" onclick="switchTab('staff')">Сотрудники</div>
+      </div>`;
+    loadData();
+  } else {
+    loadData();
+  }
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabProjects').classList.toggle('active', tab === 'projects');
+  document.getElementById('tabStaff').classList.toggle('active', tab === 'staff');
+  renderContent();
 }
 
 function logout() { sessionStorage.removeItem('dsk_user'); location.href = 'index.html'; }
 
-// ── HEAD: все сотрудники ──
-async function loadHead() {
+async function loadData() {
+  document.getElementById('content').innerHTML = '<div class="loading">Загрузка...</div>';
   try {
     const res = await apiCall({ action: 'getEmployees' });
     if (!res.success) { showError(res.error); return; }
     allProjects = res.allProjects || [];
     employees = res.employees || [];
-    renderHead();
+    renderContent();
   } catch(e) { showError(e.message); }
 }
 
-function renderHead() {
-  const div = document.getElementById('content');
-  div.innerHTML = `
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Проекты сотрудников</div>
-          <div class="card-subtitle">Нажми на сотрудника, чтобы изменить его проекты</div>
-        </div>
-      </div>
-      ${employees.map(emp => renderEmpItem(emp)).join('')}
-    </div>`;
+function renderContent() {
+  if (user.role !== 'head') { renderSelf(); return; }
+  if (activeTab === 'projects') renderProjects();
+  else renderStaff();
 }
 
-function renderEmpItem(emp) {
-  const isAll = emp.projectsFilter.toLowerCase() === 'все' || emp.projectsFilter === '';
+// ══════════════════════════════════════
+// TAB: ПРОЕКТЫ СОТРУДНИКОВ
+// ══════════════════════════════════════
+function renderProjects() {
+  const div = document.getElementById('content');
+  div.innerHTML = `<div class="card">${employees.map(emp => renderEmpProjectItem(emp)).join('')}</div>`;
+}
+
+function renderEmpProjectItem(emp) {
+  const isAll = !emp.projectsFilter || emp.projectsFilter.toLowerCase() === 'все';
   const selected = isAll ? [] : emp.projectsFilter.split(',').map(s => s.trim()).filter(Boolean);
-  const id = 'emp_' + emp.login;
-  const count = isAll ? 'все проекты' : (selected.length + ' проект' + declension(selected.length));
+  const count = isAll ? 'все проекты' : selected.length + ' ' + decl(selected.length, 'проект','проекта','проектов');
+  const pid = 'pp_' + emp.login;
 
   const checks = allProjects.map(p => {
-    const chk = isAll || selected.includes(p);
-    return `<div class="proj-check ${chk ? 'checked' : ''}" onclick="toggleCheck(this)">
-      <input type="checkbox" ${chk ? 'checked' : ''} data-project="${p}" onchange="onCheckChange(this,'${emp.login}')">
-      <label>${p}</label>
-    </div>`;
+    const on = isAll || selected.includes(p);
+    return `<div class="proj-check ${on?'on':''}" onclick="toggleCheck(this)">
+      <input type="checkbox" ${on?'checked':''} data-project="${esc(p)}">
+      <label>${esc(p)}</label></div>`;
   }).join('');
 
-  return `
-  <div class="emp-item">
-    <div class="emp-header" onclick="toggleEmp(this,'${id}')">
-      <div>
-        <div class="emp-name">${emp.name}</div>
-        <div class="emp-meta">${emp.role} · ${count}</div>
+  return `<div class="emp-item">
+    <div class="emp-row">
+      <div class="emp-avatar">${emp.name[0].toUpperCase()}</div>
+      <div class="emp-info">
+        <div class="emp-name">${esc(emp.name)} <span class="role-badge role-${emp.role}">${emp.role}</span></div>
+        <div class="emp-meta">${count}</div>
       </div>
-      <span class="emp-chevron">›</span>
+      <button class="btn-expand" id="exp_${emp.login}" onclick="togglePanel('${emp.login}','${pid}')">›</button>
     </div>
-    <div class="emp-body" id="${id}">
+    <div class="emp-panel" id="${pid}">
       <label class="all-toggle">
-        <input type="checkbox" id="all_${emp.login}" ${isAll ? 'checked' : ''} onchange="toggleAll(this,'${emp.login}')">
-        Все проекты
+        <input type="checkbox" id="all_${emp.login}" ${isAll?'checked':''} onchange="toggleAll(this,'${emp.login}')"> Все проекты
       </label>
-      <div class="projects-grid" id="grid_${emp.login}">${checks}</div>
+      <div class="proj-grid" id="grid_${emp.login}">${checks}</div>
       <div class="save-row">
-        <button class="btn-save" onclick="saveEmployee('${emp.login}')">Сохранить</button>
-        <span class="save-msg" id="msg_${emp.login}"></span>
+        <button class="btn-primary" onclick="saveProjFilter('${emp.login}')">Сохранить</button>
+        <span class="save-msg" id="pmsg_${emp.login}"></span>
       </div>
     </div>
   </div>`;
 }
 
-function toggleEmp(header, bodyId) {
-  header.classList.toggle('open');
-  document.getElementById(bodyId).classList.toggle('open');
+function togglePanel(login, panelId) {
+  const panel = document.getElementById(panelId);
+  const btn = document.getElementById('exp_' + login);
+  panel.classList.toggle('open');
+  btn.classList.toggle('open');
 }
 
 function toggleCheck(div) {
   const cb = div.querySelector('input');
   cb.checked = !cb.checked;
-  div.classList.toggle('checked', cb.checked);
-  cb.dispatchEvent(new Event('change'));
-}
-
-function onCheckChange(cb, login) {
-  const allCb = document.getElementById('all_' + login);
-  const grid = document.getElementById('grid_' + login);
-  const all = grid.querySelectorAll('input[type=checkbox]');
-  const allChecked = Array.from(all).every(c => c.checked);
-  if (allCb) allCb.checked = allChecked;
+  div.classList.toggle('on', cb.checked);
 }
 
 function toggleAll(allCb, login) {
-  const grid = document.getElementById('grid_' + login);
-  const checks = grid.querySelectorAll('.proj-check');
-  checks.forEach(div => {
+  document.getElementById('grid_' + login).querySelectorAll('.proj-check').forEach(div => {
     const cb = div.querySelector('input');
     cb.checked = allCb.checked;
-    div.classList.toggle('checked', allCb.checked);
+    div.classList.toggle('on', allCb.checked);
   });
 }
 
-async function saveEmployee(login) {
+async function saveProjFilter(login) {
   const allCb = document.getElementById('all_' + login);
   const grid = document.getElementById('grid_' + login);
-  const msgEl = document.getElementById('msg_' + login);
-
-  let filter;
-  if (allCb && allCb.checked) {
-    filter = 'все';
-  } else {
-    const checked = Array.from(grid.querySelectorAll('input[type=checkbox]:checked'))
-      .map(c => c.dataset.project);
-    filter = checked.join(', ');
-  }
-
-  msgEl.style.display = 'none';
+  const msg = document.getElementById('pmsg_' + login);
+  const filter = allCb.checked ? 'все'
+    : Array.from(grid.querySelectorAll('input:checked')).map(c => c.dataset.project).join(', ');
+  msg.style.display = 'none';
   try {
     const res = await apiCall({ action: 'saveProjectsFilter', login, projectsFilter: filter });
-    if (res.success) {
-      msgEl.textContent = '✓ Сохранено';
-      msgEl.className = 'save-msg';
-      msgEl.style.display = '';
-      // Обновляем счётчик в шапке аккордеона
-      const emp = employees.find(e => e.login === login);
-      if (emp) {
-        emp.projectsFilter = filter;
-        const count = filter === 'все' ? 'все проекты' : (filter.split(',').length + ' проект' + declension(filter.split(',').length));
-        const header = document.querySelector(`[onclick*="emp_${login}"] .emp-meta`);
-        if (header) header.textContent = emp.role + ' · ' + count;
-      }
-      setTimeout(() => { msgEl.style.display = 'none'; }, 3000);
-    } else {
-      msgEl.textContent = '✗ ' + (res.error || 'Ошибка');
-      msgEl.className = 'save-msg err';
-      msgEl.style.display = '';
-    }
-  } catch(e) {
-    msgEl.textContent = '✗ Ошибка сети';
-    msgEl.className = 'save-msg err';
-    msgEl.style.display = '';
-  }
+    const emp = employees.find(e => e.login === login);
+    if (emp) emp.projectsFilter = filter;
+    showMsg(msg, res.success ? '✓ Сохранено' : '✗ ' + res.error, !res.success);
+    if (res.success) updateEmpMeta(login, filter);
+  } catch(e) { showMsg(msg, '✗ Ошибка сети', true); }
 }
 
-// ── SELF: обычный сотрудник ──
-async function loadSelf() {
-  try {
-    const res = await apiCall({ action: 'getEmployees' });
-    if (!res.success) { showError(res.error); return; }
-    allProjects = res.allProjects || [];
-    const me = (res.employees || []).find(e => e.login === user.login);
-    if (!me) { showError('Не удалось найти данные'); return; }
-    renderSelf(me);
-  } catch(e) { showError(e.message); }
+function updateEmpMeta(login, filter) {
+  const isAll = filter === 'все';
+  const cnt = isAll ? 'все проекты' : filter.split(',').filter(Boolean).length + ' ' + decl(filter.split(',').filter(Boolean).length,'проект','проекта','проектов');
+  const metaEl = document.querySelector(`#exp_${login}`)?.closest('.emp-row')?.querySelector('.emp-meta');
+  if (metaEl) metaEl.textContent = cnt;
 }
 
-function renderSelf(emp) {
-  const isAll = emp.projectsFilter.toLowerCase() === 'все' || emp.projectsFilter === '';
-  const selected = isAll ? [] : emp.projectsFilter.split(',').map(s => s.trim()).filter(Boolean);
-
-  const checks = allProjects.map(p => {
-    const chk = isAll || selected.includes(p);
-    return `<div class="proj-check ${chk ? 'checked' : ''}" onclick="toggleCheckSelf(this)">
-      <input type="checkbox" ${chk ? 'checked' : ''} data-project="${p}">
-      <label>${p}</label>
-    </div>`;
-  }).join('');
-
-  document.getElementById('content').innerHTML = `
+// ══════════════════════════════════════
+// TAB: СОТРУДНИКИ
+// ══════════════════════════════════════
+function renderStaff() {
+  const div = document.getElementById('content');
+  div.innerHTML = `
     <div class="card">
       <div class="card-header">
-        <div>
-          <div class="card-title">Мои проекты</div>
-          <div class="card-subtitle">Отметь проекты, с которыми ты работаешь</div>
-        </div>
+        <div><div class="card-title">Сотрудники</div><div class="card-sub">${employees.length} чел.</div></div>
+        <button class="btn-primary" onclick="openAddModal()">+ Добавить</button>
       </div>
-      <div class="card-body">
-        <div class="projects-grid" id="selfGrid">${checks}</div>
-        <div class="save-row">
-          <button class="btn-save" onclick="saveSelf('${emp.login}')">Сохранить</button>
-          <span class="save-msg" id="selfMsg"></span>
-        </div>
-      </div>
+      ${employees.map(emp => renderEmpStaffItem(emp)).join('')}
     </div>`;
 }
 
-function toggleCheckSelf(div) {
-  const cb = div.querySelector('input');
-  cb.checked = !cb.checked;
-  div.classList.toggle('checked', cb.checked);
+function renderEmpStaffItem(emp) {
+  const sid = 'sp_' + emp.login;
+  return `<div class="emp-item">
+    <div class="emp-row">
+      <div class="emp-avatar">${emp.name[0].toUpperCase()}</div>
+      <div class="emp-info">
+        <div class="emp-name">${esc(emp.name)} <span class="role-badge role-${emp.role}">${emp.role}</span></div>
+        <div class="emp-meta">логин: ${esc(emp.login)}</div>
+      </div>
+      <div class="emp-actions">
+        <button class="btn-icon" onclick="togglePanel('s${emp.login}','${sid}')">✏️ Изменить</button>
+        <button class="btn-icon danger" onclick="deleteEmp('${emp.login}','${esc(emp.name)}')">🗑</button>
+      </div>
+    </div>
+    <div class="emp-panel" id="${sid}">
+      <div class="form-grid">
+        <div class="form-row"><label>Имя</label><input id="ename_${emp.login}" value="${esc(emp.name)}"></div>
+        <div class="form-row"><label>Новый пароль</label><input id="epass_${emp.login}" placeholder="Оставь пустым — без изменений"></div>
+        <div class="form-row"><label>Роль</label>
+          <select id="erole_${emp.login}">
+            <option value="content" ${emp.role==='content'?'selected':''}>content</option>
+            <option value="head" ${emp.role==='head'?'selected':''}>head</option>
+            <option value="viewer" ${emp.role==='viewer'?'selected':''}>viewer</option>
+          </select>
+        </div>
+      </div>
+      <div class="save-row">
+        <button class="btn-primary" onclick="saveEmp('${emp.login}')">Сохранить</button>
+        <span class="save-msg" id="smsg_${emp.login}"></span>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function saveEmp(login) {
+  const name = document.getElementById('ename_' + login).value.trim();
+  const pass = document.getElementById('epass_' + login).value.trim();
+  const role = document.getElementById('erole_' + login).value;
+  const msg = document.getElementById('smsg_' + login);
+  if (!name) { showMsg(msg, '✗ Введи имя', true); return; }
+  try {
+    const res = await apiCall({ action: 'updateEmployee', login, name, password: pass, role });
+    if (res.success) {
+      const emp = employees.find(e => e.login === login);
+      if (emp) { emp.name = name; emp.role = role; }
+    }
+    showMsg(msg, res.success ? '✓ Сохранено' : '✗ ' + res.error, !res.success);
+  } catch(e) { showMsg(msg, '✗ Ошибка сети', true); }
+}
+
+async function deleteEmp(login, name) {
+  if (!confirm(`Удалить сотрудника "${name}"?\nЭто действие нельзя отменить.`)) return;
+  try {
+    const res = await apiCall({ action: 'deleteEmployee', login });
+    if (res.success) {
+      employees = employees.filter(e => e.login !== login);
+      renderStaff();
+    } else alert('Ошибка: ' + res.error);
+  } catch(e) { alert('Ошибка сети'); }
+}
+
+// ══════════════════════════════════════
+// ADD MODAL
+// ══════════════════════════════════════
+function openAddModal() {
+  document.getElementById('newName').value = '';
+  document.getElementById('newLogin').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('newRole').value = 'content';
+  document.getElementById('addError').style.display = 'none';
+  document.getElementById('addModal').classList.add('open');
+}
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+async function submitAdd() {
+  const name  = document.getElementById('newName').value.trim();
+  const login = document.getElementById('newLogin').value.trim();
+  const pass  = document.getElementById('newPass').value.trim();
+  const role  = document.getElementById('newRole').value;
+  const errEl = document.getElementById('addError');
+
+  if (!name || !login || !pass) { errEl.textContent = 'Заполни все поля'; errEl.style.display = ''; return; }
+  if (employees.find(e => e.login === login)) { errEl.textContent = 'Такой логин уже есть'; errEl.style.display = ''; return; }
+
+  try {
+    const res = await apiCall({ action: 'addEmployee', name, login, password: pass, role, projectsFilter: '' });
+    if (res.success) {
+      employees.push({ name, login, role, projectsFilter: '' });
+      closeAddModal();
+      renderStaff();
+    } else { errEl.textContent = res.error || 'Ошибка'; errEl.style.display = ''; }
+  } catch(e) { errEl.textContent = 'Ошибка сети'; errEl.style.display = ''; }
+}
+
+// ══════════════════════════════════════
+// SELF VIEW (не head)
+// ══════════════════════════════════════
+function renderSelf() {
+  const me = employees.find(e => e.login === user.login);
+  if (!me) { showError('Не найден профиль'); return; }
+  const isAll = !me.projectsFilter || me.projectsFilter.toLowerCase() === 'все';
+  const selected = isAll ? [] : me.projectsFilter.split(',').map(s => s.trim()).filter(Boolean);
+  const checks = allProjects.map(p => {
+    const on = isAll || selected.includes(p);
+    return `<div class="proj-check ${on?'on':''}" onclick="toggleCheck(this)">
+      <input type="checkbox" ${on?'checked':''} data-project="${esc(p)}">
+      <label>${esc(p)}</label></div>`;
+  }).join('');
+  document.getElementById('content').innerHTML = `
+    <div class="self-card">
+      <div class="card-title" style="margin-bottom:14px">Мои проекты</div>
+      <div class="proj-grid" id="selfGrid">${checks}</div>
+      <div class="save-row">
+        <button class="btn-primary" onclick="saveSelf('${me.login}')">Сохранить</button>
+        <span class="save-msg" id="selfMsg"></span>
+      </div>
+    </div>`;
 }
 
 async function saveSelf(login) {
   const grid = document.getElementById('selfGrid');
-  const checked = Array.from(grid.querySelectorAll('input[type=checkbox]:checked'))
-    .map(c => c.dataset.project);
-  const filter = checked.join(', ');
-  const msgEl = document.getElementById('selfMsg');
-  msgEl.style.display = 'none';
+  const filter = Array.from(grid.querySelectorAll('input:checked')).map(c => c.dataset.project).join(', ');
+  const msg = document.getElementById('selfMsg');
   try {
     const res = await apiCall({ action: 'saveProjectsFilter', login, projectsFilter: filter });
-    if (res.success) {
-      // Обновляем sessionStorage
-      user.projectsFilter = filter;
-      sessionStorage.setItem('dsk_user', JSON.stringify(user));
-      msgEl.textContent = '✓ Сохранено';
-      msgEl.className = 'save-msg';
-      msgEl.style.display = '';
-      setTimeout(() => { msgEl.style.display = 'none'; }, 3000);
-    } else {
-      msgEl.textContent = '✗ ' + (res.error || 'Ошибка');
-      msgEl.className = 'save-msg err';
-      msgEl.style.display = '';
-    }
-  } catch(e) {
-    msgEl.textContent = '✗ Ошибка сети';
-    msgEl.className = 'save-msg err';
-    msgEl.style.display = '';
-  }
+    if (res.success) { user.projectsFilter = filter; sessionStorage.setItem('dsk_user', JSON.stringify(user)); }
+    showMsg(msg, res.success ? '✓ Сохранено' : '✗ ' + res.error, !res.success);
+  } catch(e) { showMsg(msg, '✗ Ошибка сети', true); }
 }
 
-function declension(n) {
-  if (n % 10 === 1 && n % 100 !== 11) return '';
-  if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) return 'а';
-  return 'ов';
-}
-
-function showError(msg) {
-  document.getElementById('content').innerHTML = `<div style="color:#EF4444;padding:20px">${msg}</div>`;
-}
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function decl(n, a, b, c) { return n%10===1&&n%100!==11?a:[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?b:c; }
+function showMsg(el, text, isErr) { el.textContent = text; el.className = 'save-msg' + (isErr?' err':''); el.style.display=''; if (!isErr) setTimeout(()=>el.style.display='none', 3000); }
+function showError(msg) { document.getElementById('content').innerHTML = `<div style="color:#EF4444;padding:20px">${msg}</div>`; }
 
 init();
 </script>

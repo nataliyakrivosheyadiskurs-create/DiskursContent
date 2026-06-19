@@ -45,6 +45,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .pitem:hover .parrow{color:var(--blue)}
 .pname{font-size:14px;font-weight:500;flex:1}
 .parrow{color:var(--border);font-size:18px;transition:color .1s}
+.archive-btn{background:none;border:none;cursor:pointer;font-size:15px;padding:4px 6px;border-radius:6px;opacity:0.45;transition:all .15s}
+.archive-btn:hover{opacity:1;background:#FEF3C7}
 
 /* back */
 .back{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;padding:0;margin-bottom:18px;transition:color .12s}
@@ -355,12 +357,15 @@ function initPage() {
 async function loadProjects() {
   const card = document.getElementById('listCard');
   card.innerHTML = '<div class="loading"><span class="sp"></span> Загрузка…</div>';
-  const res = await api('getProjects', { projectsFilter: user.projectsFilter });
+  const res = await api('getProjects', { projectsFilter: user.projectsFilter, login: user.login });
   if (!res.success) { card.innerHTML=`<div class="empty">Ошибка: ${esc(res.error)}</div>`; return; }
   if (!res.projects.length) { card.innerHTML='<div class="empty">Нет проектов</div>'; return; }
+  const isHead = user.role === 'head' || user.role === 'viewer';
   card.innerHTML = res.projects.map(p=>
-    `<div class="pitem" onclick="openProj('${esc(p)}')">`+
-    `<span class="pname">${esc(p)}</span><span class="parrow">›</span></div>`
+    `<div class="pitem">` +
+    `<span class="pname" onclick="openProj('${esc(p)}')" style="flex:1;cursor:pointer">${esc(p)}</span>` +
+    (isHead ? `<button class="archive-btn" title="Архивировать" onclick="quickArchive('${esc(p)}',event)">📦</button>` : ``) +
+    `<span class="parrow" onclick="openProj('${esc(p)}')" style="cursor:pointer">›</span></div>`
   ).join('');
 }
 
@@ -533,6 +538,14 @@ async function doUnarchive(name) {
   archiveLoaded = false;
   loadProjects();
   loadArchive();
+}
+
+async function quickArchive(name, evt) {
+  if (evt) evt.stopPropagation();
+  if (!confirm('Архивировать проект «' + name + '»?\n\nОн пропадёт из списка активных проектов.')) return;
+  const res = await api('archiveProject', { projectName: name });
+  if (res.success) { loadProjects(); archiveLoaded = false; }
+  else alert('Ошибка: ' + (res.error || 'неизвестная'));
 }
 
 function confirmArchive() {

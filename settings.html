@@ -295,6 +295,11 @@ async function saveProjFilter(login) {
     const res = await apiCall({ action: 'saveProjectsFilter', login, projectsFilter: filter });
     const emp = employees.find(e => e.login === login);
     if (emp) emp.projectsFilter = filter;
+    // Если Лера меняет свои собственные проекты — обновляем sessionStorage
+    if (res.success && login === user.login) {
+      user.projectsFilter = filter;
+      sessionStorage.setItem('dsk_user', JSON.stringify(user));
+    }
     showMsg(msg, res.success ? '✓ Сохранено' : '✗ ' + res.error, !res.success);
     if (res.success) updateEmpMeta(login, filter);
   } catch(e) { showMsg(msg, '✗ Ошибка сети', true); }

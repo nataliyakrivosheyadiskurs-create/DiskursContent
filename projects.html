@@ -241,7 +241,31 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,8
     <button class="btn btn-p btn-full" id="saveBtn" onclick="doSave()" disabled>Сохранить</button>
   </div>
 
-  <div style="margin-top:10px;text-align:center">
+  <div style="margin-top:10px">
+    <button class="btn btn-g btn-sm" onclick="toggleProjSettings()" style="width:100%;color:var(--muted);font-size:12px">
+      ⚙ Настройки проекта
+    </button>
+  </div>
+  <div id="projSettingsPanel" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px">
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--muted)">ПЛАН НА МЕСЯЦ</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">СТАТИКА</div>
+        <input id="setPlanS" type="number" min="0" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:8px;font-size:14px;text-align:center">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">REELS</div>
+        <input id="setPlanR" type="number" min="0" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:8px;font-size:14px;text-align:center">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">СТОРИС</div>
+        <input id="setPlanSt" type="number" min="0" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:8px;font-size:14px;text-align:center">
+      </div>
+    </div>
+    <button class="btn btn-p btn-sm" onclick="saveProjSettings()" style="width:100%;font-size:13px">Сохранить план</button>
+    <div id="settingsMsg" style="font-size:12px;margin-top:8px;text-align:center;display:none"></div>
+  </div>
+  <div style="margin-top:8px;text-align:center">
     <button class="btn btn-g btn-sm" onclick="showNewMonth()" style="width:100%;color:var(--muted);font-size:12px">
       + Новый месяц
     </button>
@@ -586,6 +610,35 @@ async function doUnarchive(name) {
   archiveLoaded = false;
   loadProjects();
   loadArchive();
+}
+
+function toggleProjSettings() {
+  const panel = document.getElementById('projSettingsPanel');
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  if (open && S.data) {
+    document.getElementById('setPlanS').value  = S.data.planS  || 0;
+    document.getElementById('setPlanR').value  = S.data.planR  || 0;
+    document.getElementById('setPlanSt').value = S.data.planSt || 0;
+  }
+}
+
+async function saveProjSettings() {
+  const planS  = +document.getElementById('setPlanS').value  || 0;
+  const planR  = +document.getElementById('setPlanR').value  || 0;
+  const planSt = +document.getElementById('setPlanSt').value || 0;
+  const msg = document.getElementById('settingsMsg');
+  msg.style.display = 'none';
+  const res = await api('updateProjectPlan', { projectName: S.proj, date: S.date, planS, planR, planSt });
+  if (res.success) {
+    msg.textContent = '✓ План сохранён'; msg.style.color = 'var(--green)'; msg.style.display = '';
+    // Обновляем данные и прогресс
+    const fresh = await api('getProject', { projectName: S.proj, date: S.date });
+    if (fresh.success) { S.data = fresh; renderProg(fresh); }
+    setTimeout(() => { msg.style.display = 'none'; }, 2500);
+  } else {
+    msg.textContent = '✗ ' + (res.error || 'Ошибка'); msg.style.color = 'var(--red)'; msg.style.display = '';
+  }
 }
 
 async function quickArchive(name, evt) {

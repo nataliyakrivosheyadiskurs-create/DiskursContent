@@ -183,6 +183,7 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,8
     </div>
     <div class="cbody">
       <div class="field"><label>Название проекта</label><input type="text" id="npName" placeholder="Клиент — тип работы"></div>
+      <div class="field" id="npEmpField" style="display:none"><label>Ответственный сотрудник</label><select id="npEmp"></select></div>
       <div class="g2">
         <div class="field"><label>Статика / мес</label><input type="number" id="npS" min="0" value="0"></div>
         <div class="field"><label>Reels / мес</label><input type="number" id="npR" min="0" value="0"></div>
@@ -372,7 +373,24 @@ async function loadProjects() {
 // ── NEW PROJECT ──
 function toggleForm() {
   const c = document.getElementById('formCard');
-  c.style.display = c.style.display==='none'?'block':'none';
+  const opening = c.style.display === 'none';
+  c.style.display = opening ? 'block' : 'none';
+  if (opening && (user.role === 'head' || user.role === 'viewer')) _loadEmpSelector();
+}
+
+async function _loadEmpSelector() {
+  const field = document.getElementById('npEmpField');
+  const sel   = document.getElementById('npEmp');
+  if (!field || !sel) return;
+  try {
+    const res = await api('getEmployees');
+    if (!res.success || !res.employees.length) return;
+    sel.innerHTML = res.employees
+      .filter(e => e.role === 'content' || e.role === 'head')
+      .map(e => `<option value="${esc(e.login)}" data-name="${esc(e.name)}" ${e.login===user.login?'selected':''}>${esc(e.name)}</option>`)
+      .join('');
+    field.style.display = '';
+  } catch(e) {}
 }
 
 async function createProj() {
@@ -391,14 +409,44 @@ async function createProj() {
   const [y,m,d] = dv.split('-');
   btn.disabled=true; btn.innerHTML='<span style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:_sp .6s linear infinite"></span> Создаю…';
 
-  const res = await api('createProject',{name,responsibleName:user.name,planStatic:+pS||0,planReels:+pR||0,planStories:+pSt||0,raschetDay:`${d}.${m}.${y}`});
+  const empSel = document.getElementById('npEmp');
+  const empLogin = empSel && empSel.value ? empSel.value : user.login;
+  const empName  = empSel && empSel.selectedOptions[0] ? empSel.selectedOptions[0].dataset.name : user.name;
+
+  const res = await api('createProject',{name,responsibleName:empName,planStatic:+pS||0,planReels:+pR||0,planStories:+pSt||0,raschetDay:`${d}.${m}.${y}`});
 
   btn.disabled=false; btn.textContent='Создать проект';
   if (!res.success) { showFErr(err,res.error); return; }
+
+  // Добавляем проект в фильтр ответственного
+  await _addProjectToEmployee(empLogin, name);
+
   toggleForm();
   document.getElementById('npName').value='';
   showToast('Проект создан ✓','ok');
   loadProjects();
+}
+
+async function _addProjectToEmployee(login, projectName) {
+  try {
+    const empRes = await api('getEmployees');
+    if (!empRes.success) return;
+    const emp = empRes.employees.find(e => e.login === login);
+    if (!emp) return;
+    const cur = emp.projectsFilter || '';
+    const isAll = !cur || cur.toLowerCase() === 'все';
+    if (isAll) return; // у него уже все проекты — ничего не меняем
+    const list = cur.split(',').map(s => s.trim()).filter(Boolean);
+    if (!list.includes(projectName)) {
+      list.push(projectName);
+      await api('saveProjectsFilter', { login, projectsFilter: list.join(', ') });
+      // Если это текущий пользователь — обновляем sessionStorage
+      if (login === user.login) {
+        user.projectsFilter = list.join(', ');
+        sessionStorage.setItem('dsk_user', JSON.stringify(user));
+      }
+    }
+  } catch(e) {}
 }
 
 // ── OPEN PROJECT ──
@@ -488,7 +536,7 @@ async function doSave(){
   if (S.v.s+S.v.r+S.v.st===0&&S.mode==='add'){showToast('Нечего сохранять','err');return;}
   const btn=document.getElementById('saveBtn');
   btn.disabled=true;btn.innerHTML='<span style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:_sp .6s linear infinite"></span> Сохраняю…';
-  const res=await api('saveData',{projectName:S.proj,date:S.date,values:{staticVal:S.v.s,reelsVal:S.v.r,storiesVal:S.v.st},mode:S.mode});
+  const res=await api('saveData',{projectName:S.proj,date:S.date,staticVal:S.v.s,reelsVal:S.v.r,storiesVal:S.v.st,mode:S.mode});
   btn.disabled=false;btn.textContent='Сохранить';
   if (!res.success){showToast('Ошибка: '+res.error,'err');return;}
   S.data=res;renderProg(res);resetCnt();

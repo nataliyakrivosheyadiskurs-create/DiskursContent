@@ -220,6 +220,11 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,8
     </div>
   </div>
 
+  <div id="debtBlock" style="display:none;margin-bottom:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:12px 16px">
+    <div style="font-size:11px;font-weight:700;color:#92400E;letter-spacing:.5px;margin-bottom:8px">ТЕКУЩИЙ ДОЛГ</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="debtGrid"></div>
+  </div>
+
   <div class="card cbody">
     <div class="slbl">Дата публикации</div>
     <div class="date-row">
@@ -551,6 +556,35 @@ function renderProg(d){
   document.getElementById('tlbl').textContent=`${d.daysPassed} из ${d.daysTotal} дн.`;
   document.getElementById('tfill').style.width=tp+'%';
   document.getElementById('tpct').textContent=tp+'%';
+
+  // Блок долга
+  const planS  = d.planS  || 0;
+  const planR  = d.planR  || 0;
+  const planSt = d.planSt || 0;
+  const doneS  = (d.done && d.done[0]) || 0;
+  const doneR  = (d.done && d.done[1]) || 0;
+  const doneSt = (d.done && d.done[2]) || 0;
+  const debtS  = Math.max(0, planS  - doneS);
+  const debtR  = Math.max(0, planR  - doneR);
+  const debtSt = Math.max(0, planSt - doneSt);
+  const debtBlock = document.getElementById('debtBlock');
+  if (debtS > 0 || debtR > 0 || debtSt > 0) {
+    const items = [
+      { label: 'СТАТИКА', val: debtS,  plan: planS },
+      { label: 'REELS',   val: debtR,  plan: planR },
+      { label: 'СТОРИС',  val: debtSt, plan: planSt },
+    ];
+    document.getElementById('debtGrid').innerHTML = items.map(it =>
+      `<div style="text-align:center">
+        <div style="font-size:10px;color:#92400E;margin-bottom:2px">${it.label}</div>
+        <div style="font-size:20px;font-weight:700;color:#C2410C;line-height:1">${it.val}</div>
+        <div style="font-size:11px;color:#B45309">из ${it.plan}</div>
+      </div>`
+    ).join('');
+    debtBlock.style.display = '';
+  } else {
+    debtBlock.style.display = 'none';
+  }
 }
 
 function chg(t,delta){S.v[t]=Math.max(0,(S.v[t]||0)+delta);document.getElementById('v'+t).textContent=S.v[t];}

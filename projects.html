@@ -286,6 +286,7 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,8
       <label>Расчётный день нового месяца</label>
       <input type="date" id="nmDate">
     </div>
+    <div id="nmDebt" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#92400E"></div>
     <div class="g2" style="margin-bottom:14px">
       <div class="field"><label>Статика / мес</label><input type="number" id="nmS" min="0" value="0"></div>
       <div class="field"><label>Reels / мес</label><input type="number" id="nmR" min="0" value="0"></div>
@@ -666,10 +667,37 @@ async function doArchive() {
 function showNewMonth(){
   document.getElementById('nmProjName').textContent=S.proj;
   document.getElementById('nmDate').value=todayISO();
-  document.getElementById('nmS').value=0;
-  document.getElementById('nmR').value=0;
-  document.getElementById('nmSt').value=0;
   document.getElementById('nmErr').classList.remove('on');
+  // Подставляем текущий план в поля нового месяца
+  if (S.data) {
+    document.getElementById('nmS').value  = S.data.planS  || 0;
+    document.getElementById('nmR').value  = S.data.planR  || 0;
+    document.getElementById('nmSt').value = S.data.planSt || 0;
+    // Считаем долг
+    const debtS  = (S.data.planWithDebt ? S.data.planWithDebt[0] : 0) - (S.data.done ? S.data.done[0] : 0);
+    const debtR  = (S.data.planWithDebt ? S.data.planWithDebt[1] : 0) - (S.data.done ? S.data.done[1] : 0);
+    const debtSt = (S.data.planWithDebt ? S.data.planWithDebt[2] : 0) - (S.data.done ? S.data.done[2] : 0);
+    const debtEl = document.getElementById('nmDebt');
+    if (debtS > 0 || debtR > 0 || debtSt > 0) {
+      const parts = [];
+      if (debtS  > 0) parts.push(debtS  + ' стат.');
+      if (debtR  > 0) parts.push(debtR  + ' рилс');
+      if (debtSt > 0) parts.push(debtSt + ' сторис');
+      debtEl.innerHTML = '⚠️ <b>Хвост с прошлого месяца:</b> ' + parts.join(', ');
+      debtEl.style.display = '';
+    } else {
+      debtEl.innerHTML = '✅ <b>Хвост:</b> нет';
+      debtEl.style.background = '#F0FDF4';
+      debtEl.style.borderColor = '#BBF7D0';
+      debtEl.style.color = '#166534';
+      debtEl.style.display = '';
+    }
+  } else {
+    document.getElementById('nmS').value=0;
+    document.getElementById('nmR').value=0;
+    document.getElementById('nmSt').value=0;
+    document.getElementById('nmDebt').style.display='none';
+  }
   const ov=document.getElementById('nmOverlay');
   ov.style.display='flex';
 }

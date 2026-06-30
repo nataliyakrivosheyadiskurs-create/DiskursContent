@@ -247,6 +247,11 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,8
   </div>
 
   <div style="margin-top:10px">
+    <button class="btn btn-g btn-sm" onclick="openCalendar()" style="width:100%;color:var(--muted);font-size:12px">
+      📅 Календарь публикаций
+    </button>
+  </div>
+  <div style="margin-top:8px">
     <button class="btn btn-g btn-sm" onclick="toggleProjSettings()" style="width:100%;color:var(--muted);font-size:12px">
       ⚙ Настройки проекта
     </button>
@@ -307,12 +312,39 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,8
   </div>
 </div>
 
+<!-- КАЛЕНДАРЬ ПУБЛИКАЦИЙ MODAL -->
+<div id="calOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:200;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--white);border-radius:14px;padding:22px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-size:16px;font-weight:700">Календарь публикаций</div>
+      <button onclick="hideCalendar()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1;padding:2px 6px">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px" id="calProjName"></div>
+    <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px">
+      <div class="loading" style="grid-column:1/-1;padding:20px 0;text-align:center"><span class="sp"></span></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px">ЛЕГЕНДА</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:#22C55E;display:inline-block"></span> Статика</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:#3B82F6;display:inline-block"></span> Reels</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:#F97316;display:inline-block"></span> Сторис</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,#22C55E 50%,#F97316 50%);display:inline-block"></span> Статика + Сторис</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,#3B82F6 50%,#F97316 50%);display:inline-block"></span> Reels + Сторис</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,#22C55E 50%,#3B82F6 50%);display:inline-block"></span> Статика + Reels</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:#E5E7EB;display:inline-block"></span> Ничего не выкладывалось</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbzc8iimMEq3qw0mDEL9PweBHdLKkIih6TZDGEii3yLTVeJKqCAqX8gTPZLEYR3mZ7TcMA/exec';
 
 async function api(action, params={}) {
   return new Promise((resolve) => {
     const cbName = '_cb' + Date.now() + Math.random().toString(36).slice(2);
+
     const qs = Object.entries({action, ...params}).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');
     window[cbName] = function(result) {
       delete window[cbName];
@@ -736,6 +768,71 @@ function showNewMonth(){
   ov.style.display='flex';
 }
 function hideNewMonth(){document.getElementById('nmOverlay').style.display='none';}
+
+// ── КАЛЕНДАРЬ ПУБЛИКАЦИЙ ──
+async function openCalendar() {
+  document.getElementById('calProjName').textContent = S.proj;
+  document.getElementById('calGrid').innerHTML = '<div class="loading" style="grid-column:1/-1;padding:20px 0;text-align:center"><span class="sp"></span></div>';
+  document.getElementById('calOverlay').style.display = 'flex';
+  const res = await api('getProjectCalendar', { projectName: S.proj, date: S.date });
+  if (!res.success) {
+    document.getElementById('calGrid').innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--red);padding:14px;font-size:13px">Ошибка: ${esc(res.error||'')}</div>`;
+    return;
+  }
+  renderCalendarGrid(res);
+}
+
+function hideCalendar() { document.getElementById('calOverlay').style.display = 'none'; }
+
+function _dayColor(d) {
+  const s = d.hasStatic, r = d.hasReels, st = d.hasStories;
+  const cnt = (s?1:0) + (r?1:0) + (st?1:0);
+  if (cnt === 0) return '#E5E7EB';
+  if (cnt === 1) {
+    if (s) return '#22C55E';
+    if (r) return '#3B82F6';
+    return '#F97316';
+  }
+  // 2 or 3 types — diagonal split using first two active colors
+  const colors = [];
+  if (s) colors.push('#22C55E');
+  if (r) colors.push('#3B82F6');
+  if (st) colors.push('#F97316');
+  if (colors.length >= 2) {
+    return `linear-gradient(135deg, ${colors[0]} 50%, ${colors[1]} 50%)`;
+  }
+  return colors[0] || '#E5E7EB';
+}
+
+function renderCalendarGrid(res) {
+  const grid = document.getElementById('calGrid');
+  if (!res.days || !res.days.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:14px;font-size:13px">Нет данных</div>';
+    return;
+  }
+  // Day-of-week headers
+  const dow = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  let html = dow.map(d => `<div style="text-align:center;font-size:10px;color:var(--muted);font-weight:600;padding-bottom:4px">${d}</div>`).join('');
+
+  // Determine offset for first day (JS getDay: 0=Sun..6=Sat → convert to Mon=0..Sun=6)
+  const firstDate = new Date(res.days[0].date.split('.').reverse().join('-'));
+  let firstDow = firstDate.getDay(); // 0=Sun
+  firstDow = firstDow === 0 ? 6 : firstDow - 1; // Mon=0
+  for (let i = 0; i < firstDow; i++) html += '<div></div>';
+
+  res.days.forEach(d => {
+    const dayNum = d.date.split('.')[0];
+    const bg = _dayColor(d);
+    const isGrad = bg.startsWith('linear');
+    const total = d.sFact + d.rFact + d.stFact;
+    const title = total > 0
+      ? `Статика: ${d.sFact}, Reels: ${d.rFact}, Сторис: ${d.stFact}`
+      : 'Нет публикаций';
+    html += `<div title="${esc(title)}" style="aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:${total>0?'#fff':'#9CA3AF'};${isGrad?'background:'+bg:'background-color:'+bg}">${+dayNum}</div>`;
+  });
+
+  grid.innerHTML = html;
+}
 
 async function doNewMonth(){
   const dv=document.getElementById('nmDate').value;
